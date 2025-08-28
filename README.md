@@ -25,4 +25,4 @@ This project provides a clean, modern, and responsive chat window where users ca
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/Shreya08961Chatbot-Project.git
+   git clone https://github.com/Shreya08961/Chatbot-Project.git
