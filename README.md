@@ -15,9 +15,10 @@ This project provides a clean, modern, and responsive chat window where users ca
 ---
 
 ## 🛠️ Tech Stack
-- **HTML5** – Structure  
-- **CSS3** – Styling & layout  
-- **JavaScript** – Functionality  
+- **HTML5** – It defines the structure of web page
+- **CSS3** – It is use for designing and styling purspose.
+- **JavaScript** – It gives the logic and  functionality to the web page
+- 
 
 ---
 
