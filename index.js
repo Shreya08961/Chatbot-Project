@@ -1,13 +1,21 @@
-const chatBody = document.querySelector(".chat-body");
+const chatBody = document.querySelector(".chat-body"); // find the first HTML element of class chat-body so we can use this later in javascript. document object represent the web page that is loaded in the broweser.
 const messageInput = document.querySelector(".message-input");
 const sendMessageButton = document.querySelector("#send-message");
 const fileInput = document.querySelector("#file-input");
 const fileUploadWrapper = document.querySelector(".file-upload-wrapper");
 const fileCancelButton = document.querySelector("#file-cancel");
 
-//API SETUP
-const API_KEY = "AIzaSyAON5uQW5cL1VnGXE4uvId4OJqwih_mBSU";
-const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+// async function sendMessage(message) {
+//   const res = await fetch("http://localhost:3000/chat", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify({ message }),
+//   });
+
+//   const data = await res.json();
+//   console.log(data);
+// }
+
 
 const userData = {
     message: null,
@@ -25,42 +33,71 @@ const createMessageElement = (content, ...classes) => {
     return div;
 }
 
-
-//Generate Bot Response using API
+// Generate Bot Response using BACKEND (correct way)
 const generateBotResponse = async (incomingMessageDiv) => {
-    const messageElement = incomingMessageDiv.querySelector(".message-text")
+  const messageElement = incomingMessageDiv.querySelector(".message-text");
 
-    const requestOptions = {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            contents:[{
-               parts: [{ text: userData.message }, ...(userData.file.data ? [{inline_data: userData.file}] : [])]
-          }]
-        })
-    }
+  try {
+    const response = await fetch("http://localhost:3000/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: userData.message }),
+    });
 
-    // Fetch Bot response from API
-    try{
-        const response = await fetch(API_URL, requestOptions);
-        const data = await response.json();
-        if (!response.ok) throw new Error(data?.error?.message || "API Error");
+    const data = await response.json();
 
-        // Extract and display bot's response text
-        const apiResponseText = data.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g, "$1").trim();
-        messageElement.innerText = apiResponseText;
-    }catch (error) {
-        // Handles error in the API response
-        console.log(error);
-        messageElement.innerText = error.message;
-        messageElement.style.color = "#ff0000";
+    const apiResponseText =
+      data.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "No response from bot";
+
+    messageElement.innerText = apiResponseText;
+  } catch (error) {
+    console.error(error);
+    messageElement.innerText = "Server error. Please try again.";
+    messageElement.style.color = "#ff0000";
   } finally {
-    // Reset user's file data, removing thinking indicator and scroll chat to bottom
     userData.file = {};
     incomingMessageDiv.classList.remove("thinking");
-    chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth"});
+    chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
   }
-}
+};
+
+
+//Generate Bot Response using API
+// const generateBotResponse = async (incomingMessageDiv) => {
+//     const messageElement = incomingMessageDiv.querySelector(".message-text")
+
+//     const requestOptions = {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({
+//             contents:[{
+//                parts: [{ text: userData.message }, ...(userData.file.data ? [{inline_data: userData.file}] : [])]
+//           }]
+//         })
+//     }
+
+    // Fetch Bot response from API
+//     try{
+//         const response = await fetch(API_URL, requestOptions);
+//         const data = await response.json();
+//         if (!response.ok) throw new Error(data?.error?.message || "API Error");
+
+//         // Extract and display bot's response text
+//         const apiResponseText = data.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g, "$1").trim();
+//         messageElement.innerText = apiResponseText;
+//     }catch (error) {
+//         // Handles error in the API response
+//         console.log(error);
+//         messageElement.innerText = error.message;
+//         messageElement.style.color = "#ff0000";
+//   } finally {
+//     // Reset user's file data, removing thinking indicator and scroll chat to bottom
+//     userData.file = {};
+//     incomingMessageDiv.classList.remove("thinking");
+//     chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth"});
+//   }
+// }
 
 // Handle outgoing user message 
 const handleOutgoingMessage = (e) => {
@@ -131,14 +168,14 @@ fileInput.addEventListener("change", () => {
 
 
 // Cancel file upload
+
 fileCancelButton.addEventListener("click", () => {
     userData.file = {};
     fileUploadWrapper.classList.remove("file-uploaded");
 });
 
 
-
 document.querySelector(".chat-form").appendChild(picker);
-
+ 
 sendMessageButton.addEventListener("click", (e) => handleOutgoingMessage(e));
 document.querySelector("#file-upload").addEventListener("click", () => fileInput.click());
